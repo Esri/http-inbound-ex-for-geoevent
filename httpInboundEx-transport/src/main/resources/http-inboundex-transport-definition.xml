@@ -1,0 +1,8 @@
+<transport name="HTTP-InboundEx" domain="com.esri.ges.transport.inbound" type="inbound">
+	<description>Sample HTTP transport that extends the basic HTTP transport.</description>
+	<propertyDefinitions>
+        <propertyDefinition propertyName="username" label="Username" description="User Name" propertyType="String" mandatory="false"  readOnly="false" defaultValue=""/>
+        <propertyDefinition propertyName="password" label="Password" description="Password" propertyType="Password" mandatory="false"  readOnly="false" defaultValue=""/>
+        <propertyDefinition propertyName="header" label="Header Parameter Name:Value List" description="Header parameter comma separate list of Name:Value pairs" propertyType="String" mandatory="false"  readOnly="false" defaultValue="name:value"/>
+	</propertyDefinitions>
+</transport>
