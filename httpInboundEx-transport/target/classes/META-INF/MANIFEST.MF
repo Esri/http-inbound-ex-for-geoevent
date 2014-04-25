@@ -1,8 +1,8 @@
 Manifest-Version: 1.0
 AGES-Domain: com.esri.geoevent.transport
-Bnd-LastModified: 1398377539905
-Build-Jdk: 1.7.0_21
-Built-By: mpilouk
+Bnd-LastModified: 1398399271855
+Build-Jdk: 1.7.0_45
+Built-By: Morakot
 Bundle-ContactAddress: geoevent@esri.com
 Bundle-ManifestVersion: 2
 Bundle-Name: Esri :: GeoEvent :: Transport :: HttpInboundEx
