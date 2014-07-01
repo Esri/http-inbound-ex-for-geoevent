@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>com.esri.geoevent.parent</groupId>
 		<artifactId>httpInboundEx</artifactId>
-		<version>10.2.1</version>
+		<version>10.2.2</version>
 	</parent>
 	<groupId>com.esri.geoevent.transport</groupId>
 	<artifactId>httpInboundEx-transport</artifactId>
@@ -22,9 +22,9 @@
 		<dependency>
 			<groupId>com.esri.geoevent.transport</groupId>
 			<artifactId>http-transport</artifactId>
-			<version>10.2.1</version>
+			<version>10.2.2</version>
 			<scope>system</scope>
-			<systemPath>${project.basedir}/lib/http-transport-10.2.1.jar</systemPath>
+			<systemPath>${project.basedir}/lib/http-transport-10.2.2.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
