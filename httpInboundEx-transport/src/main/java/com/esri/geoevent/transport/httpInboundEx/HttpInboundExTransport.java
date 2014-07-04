@@ -24,35 +24,21 @@
 
 package com.esri.geoevent.transport.httpInboundEx;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.Closeable;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.binary.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpRequest;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
-import org.apache.http.StatusLine;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
 
 import com.esri.ges.core.component.ComponentException;
 import com.esri.ges.transport.TransportContext;
@@ -149,172 +135,14 @@ public class HttpInboundExTransport extends HttpInboundTransport
   
   private Map<String, String> parseParameters(String params) throws UnsupportedEncodingException
   {
-    Map<String, String> query_pairs = new LinkedHashMap<String, String>();
+    Map<String, String> headerMap = new LinkedHashMap<String, String>();
     String[] pairs = params.split(",");
+    
     for (String pair : pairs) {
-        int idx = pair.indexOf(":");
-        if(idx>0)
-          query_pairs.put(URLDecoder.decode(pair.substring(0, idx), "UTF-8"), URLDecoder.decode(pair.substring(idx + 1), "UTF-8"));
+      int idx = pair.indexOf(":");
+      if(idx>0)          
+        headerMap.put(StringUtils.newStringUtf8(pair.substring(0, idx).getBytes("UTF-8")), StringUtils.newStringUtf8(pair.substring(idx + 1).getBytes("UTF-8")));
     }
-    return query_pairs;
-  }
-  
-  @Override
-  public void onReceive(TransportContext context)
-  {
-    System.out.println("received at: " + new Date());
-    //super.onReceive(context);
-    
-    
-    if (!(context instanceof HttpTransportContext))
-      return;
-
-    HttpResponse response = ((HttpTransportContext) context).getHttpResponse();
-    HttpEntity entity = ( response != null ) ? response.getEntity() : null;
-
-    if (entity != null)
-    {
-      log.debug("Got response from http request.");
-    }
-
-    StatusLine statusLine = response.getStatusLine();
-    if (statusLine.getStatusCode() != HttpStatus.SC_OK)
-    {
-      String message = ((HttpTransportContext) context).getHttpRequest().getRequestLine().getUri()
-          + " :  Request failed(" + statusLine.toString() + ")";
-      log.error(message);
-      return;
-    }
-
-    if (true)
-    {
-      BufferedReader rd=null;
-      InputStreamReader isrd=null;
-      try
-      {
-        String charset = "UTF-8";
-        isrd=new InputStreamReader(new StreamingGZIPInputStream(entity.getContent()), charset);
-        rd = new BufferedReader(isrd);
-        String line;
-        try
-        {
-          while ((line = rd.readLine()) != null)
-          {
-            //if (longPollingThread.running != true)
-            //{
-            //  break;
-            //}
-            byte[] bytes = line.getBytes();
-            ByteBuffer byteBuffer = ByteBuffer.allocate(bytes.length);
-            byteBuffer.put(bytes);
-            byteBuffer.flip();
-            byteListener.receive(byteBuffer, "");
-
-            //log.debug(line);
-            System.out.println(line);
-          }
-        }
-        finally
-        {
-          close(rd);
-          close(isrd);
-        }
-      } catch (IllegalStateException e)
-      {
-        log.error(e.getMessage(),e);
-      } catch (IOException e)
-      {
-        log.error(e.getMessage(),e);
-      }
-      
-      return;
-    }
-
-    byte[] output = null;
-
-    try
-    {
-      if (entity != null)
-      {
-        if (entity.getContentEncoding() != null)
-        {
-          if (entity.getContentEncoding().getValue().equals("gzip"))
-          {
-            output = unpackRaw(EntityUtils.toByteArray(entity));
-          } else
-          {
-            output = EntityUtils.toByteArray(entity);
-          }
-        } else
-        {
-          output = EntityUtils.toByteArray(entity);
-        }
-      }
-    } catch (IOException e)
-    {
-      String message = ((HttpTransportContext) context).getHttpRequest().getRequestLine().getUri()
-          + " :  Request failed(Error parsing response.)";
-      log.error(message, e);
-      return;
-    }
-
-    /*
-    Header[] s = response.getHeaders("last-modified");
-    Date responseLastModified = null;
-    if (s.length > 0)
-    {
-      if (s[0] != null && !s[0].getValue().isEmpty())
-      {
-        responseLastModified = dateFormatter.toDate(s[0].getValue());
-      }
-    }
-
-    if ( !blockBasedOnLastModified(responseLastModified) )
-    {
-      if (output != null)
-      {
-        ByteBuffer byteBuffer = ByteBuffer.allocate(output.length);
-        byteBuffer.put(output);
-        byteBuffer.flip();
-        byteListener.receive(byteBuffer, "");
-      }
-
-      if (responseLastModified != null && honorLastModified)
-      {
-        lastModified = responseLastModified;
-      }
-    }
-    */
-    
-  }
-  
-  private void close(Closeable isrd)
-  {
-    if(isrd != null)
-    {
-      try
-      {
-        isrd.close();
-      }
-      catch(Exception e)
-      {
-        //ignore
-      }
-    }
-  }
-  
-  private byte[] unpackRaw(byte[] b) throws IOException
-  {
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    ByteArrayInputStream bais = new ByteArrayInputStream(b);
-
-    GZIPInputStream zis = new GZIPInputStream(bais);
-    byte[] tmpBuffer = new byte[256];
-    int n;
-    while ((n = zis.read(tmpBuffer)) >= 0)
-      baos.write(tmpBuffer, 0, n);
-    zis.close();
-
-    return baos.toByteArray();
-  }
+    return headerMap;
+  }  
 }
