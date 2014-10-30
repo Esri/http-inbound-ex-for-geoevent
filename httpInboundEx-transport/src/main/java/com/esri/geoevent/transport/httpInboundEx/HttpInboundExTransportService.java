@@ -20,11 +20,9 @@
   Redlands, California, USA 92373
 
   email: contracts@esri.com
-*/
+ */
 
 package com.esri.geoevent.transport.httpInboundEx;
-
-import java.io.InputStream;
 
 import com.esri.ges.core.component.ComponentException;
 import com.esri.ges.transport.Transport;
@@ -34,15 +32,15 @@ import com.esri.ges.transport.util.XmlTransportDefinition;
 public class HttpInboundExTransportService extends HttpInboundTransportService
 {
 
-  public HttpInboundExTransportService()
-  {
-    super();
-    definition = new XmlTransportDefinition(getResourceAsStream("http-inboundex-transport-definition.xml"),
-        super.definition);  }
+	public HttpInboundExTransportService()
+	{
+		super();
+		definition = new XmlTransportDefinition(getResourceAsStream("http-inboundex-transport-definition.xml"), super.definition);
+	}
 
-  @Override
-  public Transport createTransport() throws ComponentException
-  {
-    return new HttpInboundExTransport(definition);
-  }
+	@Override
+	public Transport createTransport() throws ComponentException
+	{
+		return new HttpInboundExTransport(definition);
+	}
 }
